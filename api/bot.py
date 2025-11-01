@@ -4,11 +4,11 @@ import os
 
 app = Flask(__name__)
 
-# === CONFIGURAZIONE ===
+# === CONFIGURATION ===
 TOKEN = "8496256972:AAHsOI5HqtIbe_Z6E38xHmLKFD1olTRGd-E"
 BOT_USERNAME = "PINSCHERTRADE_BOT"
 
-# === MESSAGGI PERSONALIZZATI ===
+# === PERSONALIZED MESSAGES ===
 MESSAGES = {
     "start": """🤖 **Welcome to PINSCHERTRADE - Advanced Trading Signals**
 
@@ -39,25 +39,35 @@ Use the commands below to begin your trading journey:
 *Transform your trading with institutional-grade tools today!*
 ______""",
 
-    "app": "📱 **TRADING PLATFORM**\n\nOpen the Mini App from the bot's menu to access the trading signals and configure your preferences.",
+    "app": """📱 **TRADING PLATFORM**
 
-    "buy": """💰 **ACQUISTA PASSWORD DI ACCESSO**
+🚀 **Launch the Mini App directly here:**
+👉 [t.me/PINSCHERTRADE_BOT/app](https://t.me/PINSCHERTRADE_BOT/app)
 
-Per accedere a tutti i segnali trading avanzati di PINSCHERTRADE, acquista la password di accesso:
+**Or:**
+1. Open @PINSCHERTRADE_BOT
+2. Click the menu in the bottom right
+3. Select "Web App" or "Mini App"
 
-🔒 **LINK ACQUISTO PASSWORD:**
+*Enter your access password to start receiving real-time trading signals!*""",
+
+    "buy": """💰 **PURCHASE ACCESS PASSWORD**
+
+To access all advanced trading signals from PINSCHERTRADE, purchase the access password:
+
+🔒 **PASSWORD PURCHASE LINK:**
 https://payhip.com/b/P0CWm
 
-**Cosa ottieni:**
-• Password di accesso completa
-• Segnali Trading 24/7
-• Analisi multi-timeframe
-• Notifiche Telegram in tempo reale
-• Supporto tecnico dedicato
+**What you get:**
+• Complete access password
+• 24/7 Trading Signals
+• Multi-timeframe analysis
+• Real-time Telegram notifications
+• Dedicated technical support
 
-**Prezzo: €XXX** (controlla il link per il prezzo aggiornato)
+**Price: €XXX** (check the link for updated price)
 
-*Dopo l'acquisto, riceverai la password via email*
+*After purchase, you will receive the password via email*
 ____""",
 
     "guide": """📋 **COMPLETE GUIDE - HOW TO GET STARTED**
@@ -120,7 +130,7 @@ _____""",
 *Note: All support requests must be sent via Telegram to @PinscherTradeSupport*"""
 }
 
-# === LOGICA DEL BOT ===
+# === BOT LOGIC ===
 @app.route('/webhook', methods=['POST'])
 def webhook():
     update = request.get_json()
@@ -129,7 +139,7 @@ def webhook():
         chat_id = update['message']['chat']['id']
         text = update['message'].get('text', '').lower()
         
-        # Gestisci i comandi
+        # Handle commands
         if text in ['/start', f'/start@{BOT_USERNAME}']:
             response = MESSAGES['start']
         elif text in ['/app', f'/app@{BOT_USERNAME}']:
@@ -152,12 +162,13 @@ def send_message(chat_id, text):
     payload = {
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'HTML'
+        'parse_mode': 'Markdown',
+        'disable_web_page_preview': False
     }
     try:
         requests.post(url, json=payload, timeout=10)
     except:
-        pass  # Ignora errori di timeout
+        pass  # Ignore timeout errors
 
 @app.route('/')
 def home():
