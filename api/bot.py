@@ -1,11 +1,14 @@
 from flask import Flask, request
 import requests
+import os
 
 app = Flask(__name__)
 
+# === CONFIGURAZIONE ===
 TOKEN = "8496256972:AAHsOI5HqtIbe_Z6E38xHmLKFD1olTRGd-E"
+BOT_USERNAME = "PINSCHERTRADE_BOT"
 
-# Messaggi completi
+# === MESSAGGI PERSONALIZZATI ===
 MESSAGES = {
     "start": """🤖 **Welcome to PINSCHERTRADE - Advanced Trading Signals**
 
@@ -38,15 +41,10 @@ ______""",
 
     "app": """📱 **TRADING PLATFORM**
 
-🚀 **Launch the Mini App directly here:**
-👉 [t.me/PINSCHERTRADE_BOT/app](https://t.me/PINSCHERTRADE_BOT/app)
+🚀 **Launch the Mini App directly:**
+https://t.me/PINSCHERTRADE_BOT/app
 
-**Or:**
-1. Open @PINSCHERTRADE_BOT
-2. Click the menu in the bottom right
-3. Select "Web App" or "Mini App"
-
-*Enter your access password to start receiving real-time trading signals!*""",
+Or open the Mini App from the bot's menu to access the trading signals and configure your preferences.""",
 
     "buy": """💰 **PURCHASE ACCESS PASSWORD**
 
@@ -127,37 +125,30 @@ _____""",
 *Note: All support requests must be sent via Telegram to @PinscherTradeSupport*"""
 }
 
+# === LOGICA DEL BOT ===
 @app.route('/webhook', methods=['POST'])
 def webhook():
     update = request.get_json()
     
     if 'message' in update:
         chat_id = update['message']['chat']['id']
-        text = update['message'].get('text', '')
+        text = update['message'].get('text', '').lower()
         
-        # Log per debug
-        print(f"Received message: '{text}' from chat {chat_id}")
-        
-        # Mappatura diretta dei comandi
-        command_map = {
-            '/start': 'start',
-            '/app': 'app', 
-            '/buy': 'buy',
-            '/guide': 'guide',
-            '/support': 'support'
-        }
-        
-        # Cerca il comando esatto
-        response_key = 'start'  # default
-        for cmd, key in command_map.items():
-            if text.lower().startswith(cmd.lower()):
-                response_key = key
-                break
-        
-        print(f"Selected response: {response_key}")
-        response_text = MESSAGES.get(response_key, MESSAGES['start'])
-        
-        send_message(chat_id, response_text)
+        # Gestisci i comandi
+        if text in ['/start', f'/start@{BOT_USERNAME}']:
+            response = MESSAGES['start']
+        elif text in ['/app', f'/app@{BOT_USERNAME}']:
+            response = MESSAGES['app']
+        elif text in ['/buy', f'/buy@{BOT_USERNAME}']:
+            response = MESSAGES['buy']
+        elif text in ['/guide', f'/guide@{BOT_USERNAME}']:
+            response = MESSAGES['guide']
+        elif text in ['/support', f'/support@{BOT_USERNAME}']:
+            response = MESSAGES['support']
+        else:
+            response = MESSAGES['start']
+            
+        send_message(chat_id, response)
     
     return 'OK'
 
@@ -166,36 +157,24 @@ def send_message(chat_id, text):
     payload = {
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'Markdown',
-        'disable_web_page_preview': False
+        'parse_mode': 'HTML'
     }
     try:
-        result = requests.post(url, json=payload, timeout=10)
-        print(f"Message sent to Telegram, status: {result.status_code}")
-        return True
-    except Exception as e:
-        print(f"Error sending message: {e}")
-        return False
+        requests.post(url, json=payload, timeout=10)
+    except:
+        pass  # Ignora errori di timeout
 
 @app.route('/')
 def home():
     return "🤖 PINSCHERTRADE Bot is running!"
 
+# === SETUP WEBHOOK ===
 @app.route('/set-webhook')
 def set_webhook():
     webhook_url = f"https://{request.host}/webhook"
     url = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}"
     result = requests.get(url).json()
     return f"Webhook setup: {result}"
-
-# Test route per verificare i messaggi
-@app.route('/test-messages')
-def test_messages():
-    return {
-        "app_message": MESSAGES['app'],
-        "guide_message": MESSAGES['guide'],
-        "all_keys": list(MESSAGES.keys())
-    }
 
 if __name__ == '__main__':
     app.run()
