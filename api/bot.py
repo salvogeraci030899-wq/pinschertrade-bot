@@ -137,18 +137,21 @@ def webhook():
     
     if 'message' in update:
         chat_id = update['message']['chat']['id']
-        text = update['message'].get('text', '').lower()
+        text = update['message'].get('text', '')
         
-        # Handle commands
-        if text in ['/start', f'/start@{BOT_USERNAME}']:
+        # Convert to lowercase for comparison but keep original for response
+        text_lower = text.lower()
+        
+        # Handle commands - check both lowercase and original case
+        if text_lower in ['/start', f'/start@{BOT_USERNAME.lower()}']:
             response = MESSAGES['start']
-        elif text in ['/app', f'/app@{BOT_USERNAME}']:
+        elif text_lower in ['/app', f'/app@{BOT_USERNAME.lower()}']:
             response = MESSAGES['app']
-        elif text in ['/buy', f'/buy@{BOT_USERNAME}']:
+        elif text_lower in ['/buy', f'/buy@{BOT_USERNAME.lower()}']:
             response = MESSAGES['buy']
-        elif text in ['/guide', f'/guide@{BOT_USERNAME}']:
+        elif text_lower in ['/guide', f'/guide@{BOT_USERNAME.lower()}']:
             response = MESSAGES['guide']
-        elif text in ['/support', f'/support@{BOT_USERNAME}']:
+        elif text_lower in ['/support', f'/support@{BOT_USERNAME.lower()}']:
             response = MESSAGES['support']
         else:
             response = MESSAGES['start']
@@ -166,9 +169,10 @@ def send_message(chat_id, text):
         'disable_web_page_preview': False
     }
     try:
-        requests.post(url, json=payload, timeout=10)
-    except:
-        pass  # Ignore timeout errors
+        response = requests.post(url, json=payload, timeout=10)
+        print(f"Message sent to {chat_id}, status: {response.status_code}")
+    except Exception as e:
+        print(f"Error sending message: {e}")
 
 @app.route('/')
 def home():
