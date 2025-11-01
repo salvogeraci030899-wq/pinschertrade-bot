@@ -1,14 +1,11 @@
 from flask import Flask, request
 import requests
-import os
 
 app = Flask(__name__)
 
-# === CONFIGURATION ===
 TOKEN = "8496256972:AAHsOI5HqtIbe_Z6E38xHmLKFD1olTRGd-E"
-BOT_USERNAME = "PINSCHERTRADE_BOT"
 
-# === PERSONALIZED MESSAGES ===
+# Messaggi completi
 MESSAGES = {
     "start": """🤖 **Welcome to PINSCHERTRADE - Advanced Trading Signals**
 
@@ -130,7 +127,6 @@ _____""",
 *Note: All support requests must be sent via Telegram to @PinscherTradeSupport*"""
 }
 
-# === BOT LOGIC ===
 @app.route('/webhook', methods=['POST'])
 def webhook():
     update = request.get_json()
@@ -139,21 +135,29 @@ def webhook():
         chat_id = update['message']['chat']['id']
         text = update['message'].get('text', '')
         
-        # Simple command detection that works
-        if '/start' in text.lower():
-            response = MESSAGES['start']
-        elif '/app' in text.lower():
-            response = MESSAGES['app']
-        elif '/buy' in text.lower():
-            response = MESSAGES['buy']
-        elif '/guide' in text.lower():
-            response = MESSAGES['guide']
-        elif '/support' in text.lower():
-            response = MESSAGES['support']
-        else:
-            response = MESSAGES['start']
-            
-        send_message(chat_id, response)
+        # Log per debug
+        print(f"Received message: '{text}' from chat {chat_id}")
+        
+        # Mappatura diretta dei comandi
+        command_map = {
+            '/start': 'start',
+            '/app': 'app', 
+            '/buy': 'buy',
+            '/guide': 'guide',
+            '/support': 'support'
+        }
+        
+        # Cerca il comando esatto
+        response_key = 'start'  # default
+        for cmd, key in command_map.items():
+            if text.lower().startswith(cmd.lower()):
+                response_key = key
+                break
+        
+        print(f"Selected response: {response_key}")
+        response_text = MESSAGES.get(response_key, MESSAGES['start'])
+        
+        send_message(chat_id, response_text)
     
     return 'OK'
 
@@ -166,21 +170,32 @@ def send_message(chat_id, text):
         'disable_web_page_preview': False
     }
     try:
-        requests.post(url, json=payload, timeout=10)
-    except:
-        pass
+        result = requests.post(url, json=payload, timeout=10)
+        print(f"Message sent to Telegram, status: {result.status_code}")
+        return True
+    except Exception as e:
+        print(f"Error sending message: {e}")
+        return False
 
 @app.route('/')
 def home():
     return "🤖 PINSCHERTRADE Bot is running!"
 
-# === SETUP WEBHOOK ===
 @app.route('/set-webhook')
 def set_webhook():
     webhook_url = f"https://{request.host}/webhook"
     url = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}"
     result = requests.get(url).json()
     return f"Webhook setup: {result}"
+
+# Test route per verificare i messaggi
+@app.route('/test-messages')
+def test_messages():
+    return {
+        "app_message": MESSAGES['app'],
+        "guide_message": MESSAGES['guide'],
+        "all_keys": list(MESSAGES.keys())
+    }
 
 if __name__ == '__main__':
     app.run()
