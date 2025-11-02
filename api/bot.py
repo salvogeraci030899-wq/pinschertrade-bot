@@ -144,6 +144,35 @@ def check_markets():
         print(f"❌ Error in check-markets: {e}")
         return jsonify({'status': 'error', 'error': str(e)}), 500
 
+# === ENDPOINT HEALTH CHECK PER UPTIMEROBOT ===
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Endpoint semplice per UptimeRobot"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'active_users': len(user_configs),
+        'notifications_enabled': sum(1 for config in user_configs.values() if config.get('notifications_enabled', False)),
+        'service': 'PINSCHERTRADE Bot'
+    }), 200
+
+# === ENDPOINT API SEMPLICE ===
+@app.route('/api/check-markets', methods=['GET'])
+def check_markets_api():
+    """Endpoint API semplificato"""
+    try:
+        notification_manager.fetch_market_data()
+        signals = notification_manager.analyze_signals()
+        
+        return jsonify({
+            'status': 'success',
+            'signals_found': len(signals),
+            'timestamp': datetime.now().isoformat(),
+            'market_data': {coin: data for coin, data in notification_manager.coin_data.items()}
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
 # === GESTIONE ISCRIZIONI UTENTI ===
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -203,7 +232,7 @@ def webhook():
             
         send_message(chat_id, response)
     
-    return 'OK'
+    return jsonify({'status': 'ok'})
 
 # === FUNZIONE INVIO MESSAGGI ===
 def send_message(chat_id, text):
@@ -323,21 +352,28 @@ To access all advanced trading signals from PINSCHERTRADE, purchase the access p
 *Note: All support requests must be sent via Telegram to @PinscherTradeSupport*"""
 }
 
+# === PAGINA PRINCIPALE ===
 @app.route('/')
 def home():
     active_users = sum(1 for config in user_configs.values() if config.get('notifications_enabled', False))
     return f"""
-🤖 PINSCHERTRADE Bot is running with 24/7 Notifications!
-<br><br>
-📊 <strong>Statistics:</strong>
-• Total Users: {len(user_configs)}
-• Active Notifications: {active_users}
-• Last Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-<br><br>
-🔗 <strong>Endpoints:</strong>
-• <a href="/check-markets">/check-markets</a> - Manual market check
-• <a href="/stats">/stats</a> - Statistics
-• <a href="/set-webhook">/set-webhook</a> - Setup webhook
+<h1>🤖 PINSCHERTRADE Bot is running with 24/7 Notifications!</h1>
+<br>
+<p><strong>📊 Statistics:</strong></p>
+<ul>
+<li>Total Users: {len(user_configs)}</li>
+<li>Active Notifications: {active_users}</li>
+<li>Last Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</li>
+</ul>
+<br>
+<p><strong>🔗 Endpoints:</strong></p>
+<ul>
+<li><a href="/check-markets">/check-markets</a> - Manual market check</li>
+<li><a href="/health">/health</a> - Health check (for UptimeRobot)</li>
+<li><a href="/api/check-markets">/api/check-markets</a> - API endpoint</li>
+<li><a href="/stats">/stats</a> - Statistics</li>
+<li><a href="/set-webhook">/set-webhook</a> - Setup webhook</li>
+</ul>
 """
 
 @app.route('/set-webhook')
@@ -345,17 +381,19 @@ def set_webhook():
     webhook_url = f"https://{request.host}/webhook"
     url = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}"
     result = requests.get(url).json()
-    return f"Webhook setup: {result}"
+    return jsonify(result)
 
 # === STATISTICHE ===
 @app.route('/stats')
 def stats():
     active_users = sum(1 for config in user_configs.values() if config.get('notifications_enabled', False))
     return jsonify({
+        'status': 'success',
         'total_users': len(user_configs),
         'active_notifications': active_users,
-        'users': user_configs,
-        'last_check': datetime.now().isoformat()
+        'users_count': len(user_configs),
+        'last_check': datetime.now().isoformat(),
+        'service': 'PINSCHERTRADE Bot API'
     })
 
 # === AVVIA CONTROLLO AUTOMATICO ALL'AVVIO ===
@@ -388,5 +426,7 @@ def start_background_checks():
 # Avvia i controlli in background quando l'app si avvia
 start_background_checks()
 
+# === CONFIGURAZIONE VERCEL ===
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
