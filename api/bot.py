@@ -33,7 +33,7 @@ Use the commands below to begin your trading journey:
 
 📱 `/app` - Open the trading platform
 💰 `/buy` - Purchase your access pass
-📖 `/guide` - Step-by-step setup instructions
+📖 `/guide` - Setup instructions
 🆘 `/support` - Technical assistance
 
 *Transform your trading with institutional-grade tools today!*
