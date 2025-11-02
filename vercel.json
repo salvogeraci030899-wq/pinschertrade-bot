@@ -11,5 +11,8 @@
       "src": "/(.*)",
       "dest": "bot.py"
     }
-  ]
+  ],
+  "env": {
+    "PYTHONPATH": "./"
+  }
 }
