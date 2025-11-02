@@ -23,7 +23,7 @@ PINSCHERTRADE is a professional trading platform that provides real-time cryptoc
 
 **Key Features:**
 ✅ Real-time Trading Signals
-✅ Multi-Timeframe Analysis (5m, 15m, 1h, 4h)
+✅ Multi-Timeframe Analysis
 ✅ Automated Telegram Notifications
 ✅ Professional Risk Management
 ✅ Bitget, Binance & TradingView Integration
