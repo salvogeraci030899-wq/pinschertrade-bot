@@ -37,7 +37,7 @@ Use the commands below to begin your trading journey:
 🆘 `/support` - Technical assistance
 
 *Transform your trading with institutional-grade tools today!*
-______""",
+""",
 
     "app": """📱 **TRADING PLATFORM**
 
