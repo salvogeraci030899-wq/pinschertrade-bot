@@ -31,10 +31,10 @@ PINSCHERTRADE is a professional trading platform that provides real-time cryptoc
 **Get Started:**
 Use the commands below to begin your trading journey:
 
-📱 `/APP` - Open the trading platform
-💰 `/BUY` - Purchase your access pass
-📖 `/GUIDE` - Step-by-step setup instructions
-🆘 `/SUPPORT` - Technical assistance
+📱 `/app` - Open the trading platform
+💰 `/buy` - Purchase your access pass
+📖 `/guide` - Step-by-step setup instructions
+🆘 `/support` - Technical assistance
 
 *Transform your trading with institutional-grade tools today!*
 ______""",
@@ -42,7 +42,7 @@ ______""",
     "app": """📱 **TRADING PLATFORM**
 
 🚀 **Launch the Mini App directly:**
-https://t.me/PINSCHERTRADE_BOT/app
+https://t.me/pinschertrade_bot/app
 
 Or open the Mini App from the bot's menu to access the trading signals and configure your preferences.""",
 
