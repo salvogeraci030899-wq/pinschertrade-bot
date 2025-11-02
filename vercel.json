@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "/api/bot.py"
     }
-  ]
+  ],
+  "functions": {
+    "api/bot.py": {
+      "maxDuration": 30
+    }
+  }
 }
